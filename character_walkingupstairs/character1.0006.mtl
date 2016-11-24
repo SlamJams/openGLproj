@@ -1,0 +1,63 @@
+newmtl Boy01_Hair_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Boy_Hair_diffuse.png
+Ni 1.00
+Ks 0.07 0.07 0.07
+Ns 18.00
+newmtl Boy01_Hands_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Boy_Hands_diffuse.png
+Ni 1.00
+Ks 0.04 0.04 0.04
+Ns 18.00
+newmtl Boy01_Head_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd -o -1 -1 Boy_Head_diffuse.png
+Ni 1.00
+Ks 0.02 0.02 0.02
+Ns 18.00
+newmtl Boy01_LowerBody_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Boy_LowerBody_diffuse.png
+Ni 1.00
+Ks 0.02 0.02 0.02
+Ns 18.00
+newmtl Boy01_Scarf_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Boy_Scarf_diffuse.png
+Ni 1.00
+Ks 0.00 0.00 0.00
+Ns 18.00
+newmtl Boy01_Shoes_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Boy_Shoes_diffuse.png
+Ni 1.00
+Ks 0.07 0.07 0.07
+Ns 18.00
+newmtl Boy01_UpperBody_GeoSG
+illum 4
+Kd 0.00 0.00 0.00
+Ka 0.00 0.00 0.00
+Tf 1.00 1.00 1.00
+map_Kd Boy_UpperBody_diffuse.png
+Ni 1.00
+Ks 0.00 0.00 0.00
+Ns 18.00
