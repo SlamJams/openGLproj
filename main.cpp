@@ -1,78 +1,20 @@
-#include <GL/freeglut.h>
 #include <stdio.h>
 #include <string>
 #include <assimp/Importer.hpp>      // C++ importer interface
 #include <assimp/scene.h>           // Output data structure
 #include <assimp/postprocess.h>     // Post processing flags
+#include "objloader.h"
+#include "objloader.cpp"
+#include <GL/freeglut.h>
 
 #define HEIGHT 1024  // hight size
 #define WIDTH 800    // width size
 
 
 
+objloader obj;
 
 float ex = 0, ey = 0, ez = 20, cx = 0, cy = 0, cz = -1; 
-
-double rotate_y=0; 
-double rotate_x=0;
-
-
-void objloader(const char *filename)
-{
-   Assimp::Importer importer;
-   const aiScene *scene =  importer.ReadFile(filename, aiProcessPreset_TargetRealtime_Fast);
-   aiMesh *mesh = scene->mMeshes[0];
-   float *vertexArray;
-   float *normalArray;
-   float *uvArray;
-
-   int numVerts;
-
-   numVerts = mesh->mNumFaces*3;
-
-   vertexArray = new float[mesh->mNumFaces*3*3];
-   normalArray = new float[mesh->mNumFaces*3*3];
-   uvArray = new float[mesh->mNumFaces*3*2];
-
-   for(unsigned int i=0;i<mesh->mNumFaces;i++)
-   {
-      const aiFace& face = mesh->mFaces[i];
-
-      for(int j=0;j<3;j++)
-      {
-         aiVector3D uv = mesh->mTextureCoords[0][face.mIndices[j]];
-         memcpy(uvArray,&uv,sizeof(float)*2);
-         uvArray+=2;
-
-         aiVector3D normal = mesh->mNormals[face.mIndices[j]];
-         memcpy(normalArray,&normal,sizeof(float)*3);
-         normalArray+=3;
-
-         aiVector3D pos = mesh->mVertices[face.mIndices[j]];
-         memcpy(vertexArray,&pos,sizeof(float)*3);
-         vertexArray+=3;
-      }
-   }
-
-   uvArray-=mesh->mNumFaces*3*2;
-   normalArray-=mesh->mNumFaces*3*3;
-   vertexArray-=mesh->mNumFaces*3*3;
-
-   glEnableClientState(GL_VERTEX_ARRAY);
-   glEnableClientState(GL_NORMAL_ARRAY);
-   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    
-   glVertexPointer(3,GL_FLOAT,0,vertexArray);
-   glNormalPointer(GL_FLOAT,0,normalArray);
-    
-   glClientActiveTexture(GL_TEXTURE0_ARB);
-   glTexCoordPointer(2,GL_FLOAT,0,uvArray);
-    
-   glDrawArrays(GL_TRIANGLES,0,numVerts);
-   glDisableClientState(GL_VERTEX_ARRAY);
-   glDisableClientState(GL_NORMAL_ARRAY);
-   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-}
 
 
 void reshape(GLsizei width, GLsizei height) {  // GLsizei for non-negative integer
@@ -90,7 +32,8 @@ void reshape(GLsizei width, GLsizei height) {  // GLsizei for non-negative integ
    gluPerspective(45.0f, aspect, 0.1f, 100.0f);
 }
 
-GLuint loadTextures(const char *filename)
+// function for loading 256x256 size bmp texture files for the cubes.
+GLuint loadTextures(const char *filename) 
 {
    GLuint texture;
    int height = 256;
@@ -155,10 +98,6 @@ void displayScene()
    gluLookAt(ex, ey, ez, 0, 0, 0, 0, 1, 0);
    glTranslatef(0.0f,0.0f,-5.0);                      // Move Into The Screen 5 Units
 
-   
-
-   glRotatef( rotate_x, 1.0, 0.0, 0.0 );
-   glRotatef( rotate_y, 0.0, 1.0, 0.0 );
    glEnable(GL_TEXTURE_2D);
    GLuint texture;
    texture = loadTextures("Textures/marble.bmp");
@@ -234,32 +173,14 @@ void displayScene()
       glTexCoord2f(0.0f, 1.0f); glVertex3f(-1.0f,  1.0f, -1.0f);
    glEnd();
 
-   objloader("character_walkingupstairs/character1.0001.obj");
 
    glFlush();
+
+   int figure;
+   figure = obj.load("character_walkingupstairs/character1.0001.obj");
+   glCallList(figure);
+
    glutSwapBuffers();
-
-}
-
-
-void specialKeys( int key, int x, int y ) {
-
-  //  Right arrow - increase rotation by 5 degree
-	if (key == GLUT_KEY_RIGHT)
-		rotate_y += 5;
-
-  //  Left arrow - decrease rotation by 5 degree
-	else if (key == GLUT_KEY_LEFT)
-		rotate_y -= 5;
-
-	else if (key == GLUT_KEY_UP)
-		rotate_x += 5;
-
-	else if (key == GLUT_KEY_DOWN)
-		rotate_x -= 5;
-
-  //  Request display update
-	glutPostRedisplay();
 
 }
 
@@ -273,7 +194,6 @@ int main(int argc, char** argv)
 
    glEnable(GL_DEPTH_TEST);
    glutDisplayFunc(displayScene);
-   glutSpecialFunc(specialKeys);
    glutReshapeFunc(reshape);       // Register callback handler for window re-size event
    initGL();
    glutMainLoop();  
