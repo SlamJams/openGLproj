@@ -376,17 +376,24 @@ objloader::~objloader()
 GLuint objloader::loadTexture(const char* filename, std::string path)
 {
 
-	//char filen[200];		
-	//strcpy(filen, (path+filename).data());
+	char filen[200];		
+	strcpy(filen, (path+filename).data());
+
 	GLuint textureID;
     glGenTextures(1, &textureID);
     int width,height;
 
-    unsigned char* image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
+    textureID = SOIL_load_OGL_texture(filen, SOIL_LOAD_AUTO,SOIL_CREATE_NEW_ID,SOIL_FLAG_MIPMAPS|SOIL_FLAG_INVERT_Y|SOIL_FLAG_NTSC_SAFE_RGB|SOIL_FLAG_COMPRESS_TO_DXT);
+
+
+ if( !textureID )                          // error loading file
+ 	std::cout << "Texture " << filen << " not loaded. " << std::endl;
+
     // Assign texture to ID
+    //glActiveTexture(GL_TEXTURE);
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    //std::cout << filen << std::endl;
+    //glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    std::cout << filen << std::endl;
     //glGenerateMipmap(GL_TEXTURE_2D);	
 
     // Parameters
@@ -395,7 +402,7 @@ GLuint objloader::loadTexture(const char* filename, std::string path)
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glBindTexture(GL_TEXTURE_2D, 0);
-    SOIL_free_image_data(image);
+    //SOIL_free_image_data(image);
 
 
 	texture.push_back(textureID);

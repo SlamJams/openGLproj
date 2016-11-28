@@ -5,7 +5,7 @@
 #include <vector>
 #include <cstdio>
 #include <GL/freeglut.h>
-float ex = 0, ey = -30, ez = 60, cx = 0, cy = 0, cz = -1; 
+float ex = 0, ey = -20, ez = 30, cx = 0, cy = 0, cz = -1; 
 
 int cube;
 objloader obj; //create an instance of the objloader
@@ -109,6 +109,7 @@ void init()
    glEnable(GL_LIGHT0);
    float col[]={1.0,1.0,1.0,1.0};
    glLightfv(GL_LIGHT0,GL_DIFFUSE,col);
+   //loadAnimation(frames, "character_walkingupstairs/", "character1", 1, obj);
    loadAnimation(frames, "character_walkingupstairs/", "character1", 30, obj);
    loadAnimation(frames, "character_pickup/", "character1", 30, obj);
 }
@@ -118,18 +119,17 @@ void display()
    
    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
    glLoadIdentity();
-   gluLookAt(ex, ey, ez, 0, -40, 0, 0, 30, 0);
+   gluLookAt(ex, ey, ez, 0, -20, 0, 0, 30, 0);
    glRotatef(90.0f, 0.0f, 1.0f, 0.0f);
    float pos[]={-1.0,1.0,-2.0,1.0};
    glLightfv(GL_LIGHT0,GL_POSITION,pos);
-   glScalef(2.0f, 2.0f, 2.0f);
    glEnable(GL_TEXTURE_2D);
    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
    glEnable(GL_COLOR_MATERIAL);
    GLuint texture;
    texture = loadTextures("Textures/marble.bmp");
    glBindTexture(GL_TEXTURE_2D, texture);
-   glTranslatef(0.0f,-25.0f, 0.0f);
+   glTranslatef(0.0f,-25.0f, 2.0f);
    glBegin(GL_QUADS);
       // Front Face
       glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, -1.0f,  1.0f);
@@ -204,8 +204,10 @@ void display()
 
    //glLoadIdentity();
    glFlush();
-
+   //glScalef(2.0f, 2.0f, 2.0f);
    glScalef(0.07f, 0.07f, 0.07f);
+
+   //glCallList(frames[currentFrame]);
    
    if(currentFrame < 30)
    {
