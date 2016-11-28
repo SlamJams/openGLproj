@@ -1,10 +1,5 @@
-//This example program is created by thecplusplusuy for demonstration purposes. It's a simple 3D model loader (wavefront (.obj)), which is capable to load materials and UV textures:
-//http://www.youtube.com/user/thecplusplusguy
-//Free source, modify if you want, LGPL licence (I guess), I would be happy, if you would not delete the link
-//so other people can see the tutorial
-//this file is the objloader.cpp
-#include <cstring>
 #include "objloader.h"
+#include <string>
 	//nothing to explain here
 	coordinate::coordinate(float a,float b,float c)
 	{
@@ -40,7 +35,7 @@
 	}
 	
 	//nothing to explain here
-	material::material(const char* na,float al,float n,float ni2,float* d,float* a,float* s,int i,int t)
+	material::material(const char* na,float al,float n,float ni2,float* d,float* a,float* s,int i,GLuint t)
 	{
 		name=na;
 		alpha=al;
@@ -69,7 +64,7 @@
 		v=b;
 	}
 
-int objloader::load(const char* filename)
+int objloader::load(const char* filename, std::string path)
 {
 	std::ifstream in(filename);	//open the model file
 	if(!in.is_open())
@@ -151,19 +146,13 @@ int objloader::load(const char* filename)
 	}else if((*coord[i])[0]=='m' && (*coord[i])[1]=='t' && (*coord[i])[2]=='l' && (*coord[i])[3]=='l')	//material library, a file, which contain
 																																																			//all of the materials
 	{
-		char path[] = "character_walkingupstairs/";
-		char filen[200];
+		char filen[200];		
 		sscanf(coord[i]->c_str(),"mtllib %s",filen);	//read the filename
-		std::cout << filen << std::endl;
-		char * newArray = new char[std::strlen(path)+std::strlen(filen)+1];
-    	std::strcpy(newArray,path);
-    	std::strcat(newArray,filen);
-    	std::cout << newArray << std::endl;
-		std::ifstream mtlin(newArray);	//open the file
-		delete [] newArray;
+		strcpy(filen, (path+filen).data());
+		std::ifstream mtlin(filen);	//open the file
 		if(!mtlin.is_open())	//if not opened error message, clean all memory, return with -1
 		{
-			std::cout << "connot open the material file" << std::endl;
+			std::cout << "connot open the material file " << filen << std::endl;
 			clean();
 			return -1;
 		}
@@ -179,12 +168,11 @@ int objloader::load(const char* filename)
 		char filename[200];	//filename of the texture
 		float amb[3],dif[3],spec[3],alpha,ns,ni;	//colors, shininess, and something else
 		int illum;
-		unsigned int texture;
+		GLuint texture;
 		bool ismat=false;	//do we already have a material read in to these variables?
 		strcpy(filename,"\0");	//set filename to nullbyte character
 		for(int i=0;i<tmp.size();i++) //go through all lines of the mtllib file
 		{
-			std::cout << i << std::endl;	////delete
 			if(tmp[i][0]=='#')	//we don't care about comments
 				continue;
 			if(tmp[i][0]=='n' && tmp[i][1]=='e' && tmp[i][2]=='w')	//new material
@@ -230,20 +218,20 @@ int objloader::load(const char* filename)
 				sscanf(tmp[i].c_str(),"illum %d",&illum);
 				ismat=true;
 			}else if(tmp[i][0]=='m' && tmp[i][1]=='a')	//and the texture
-			{
-				std::cout << "texture" << std::endl; //DELETE
+			{	
+				if(tmp[i][7] == '-')
+				{
+					continue;
+				}
+				else
+				{
 				sscanf(tmp[i].c_str(),"map_Kd %s",filename);
-				std::cout << filename << std::endl;
-				char * newArray2 = new char[std::strlen(path)+std::strlen(filename)+1];
-    			std::strcpy(newArray2,path);
-    			std::strcat(newArray2,filename);
-    			std::cout << newArray2 << std::endl;
-				texture=loadTexture(newArray2);	//read the filename, and use the loadTexture function to load it, and get the id.
+				//std::cout << filename << std::endl;
+				texture=loadTexture(filename, path);	//read the filename, and use the loadTexture function to load it, and get the id.
 				ismat=true;
-				delete [] newArray2;
+				}
 			}
 		}
-
 		if(ismat)	//there is no newmat after the last newmat, so we have to put the last material 'manually'
 		{
 			if(strcmp(filename,"\0")!=0)
@@ -253,8 +241,7 @@ int objloader::load(const char* filename)
 					materials.push_back(new material(name,alpha,ns,ni,dif,amb,spec,illum,-1));				
 			}
 		}
-	}
-	else if((*coord[i])[0]=='v' && (*coord[i])[1]=='t')	//back to the obj file, texture coorinate
+	}else if((*coord[i])[0]=='v' && (*coord[i])[1]=='t')	//back to the obj file, texture coorinate
 	{
 		float u,v;
 		sscanf(coord[i]->c_str(),"vt %f %f",&u,&v);	//read the uv coordinate
@@ -267,7 +254,6 @@ int objloader::load(const char* filename)
 		ismaterial=false;
 	else	//else we have
 		ismaterial=true;
-	std::cout << vertex.size() << " " << normals.size() << " " << faces.size() << " " << materials.size() << std::endl; 	//test purposes
 	//draw
 	int num;
 	num=glGenLists(1);	//I generate a unique identifier for the list
@@ -387,16 +373,20 @@ objloader::~objloader()
 }
 
 //load the filename textures (only BMP, R5G6B5 format)
-unsigned int objloader::loadTexture(const char* filename)
+GLuint objloader::loadTexture(const char* filename, std::string path)
 {
 
-	unsigned int num;
-    glGenTextures(1, &num);
+	//char filen[200];		
+	//strcpy(filen, (path+filename).data());
+	GLuint textureID;
+    glGenTextures(1, &textureID);
     int width,height;
+
     unsigned char* image = SOIL_load_image(filename, &width, &height, 0, SOIL_LOAD_RGB);
     // Assign texture to ID
-    glBindTexture(GL_TEXTURE_2D, num);
+    glBindTexture(GL_TEXTURE_2D, textureID);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+    //std::cout << filen << std::endl;
     //glGenerateMipmap(GL_TEXTURE_2D);	
 
     // Parameters
@@ -408,9 +398,10 @@ unsigned int objloader::loadTexture(const char* filename)
     SOIL_free_image_data(image);
 
 
-	texture.push_back(num);
-	return num;
+	texture.push_back(textureID);
+	return textureID;
 }
+
 
 objloader::objloader()
 {
